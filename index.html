@@ -174,7 +174,9 @@ body.present aside,body.nopanel aside{display:none}
 .mbox.folder .tabpanel{background:var(--panel);height:min(624px,calc(88vh - 48px));display:flex;flex-direction:column;overflow:auto;box-shadow:0 24px 64px rgba(0,0,0,.35);border-radius:0 var(--r-lg) var(--r-lg) var(--r-lg);padding:var(--s5)}
 .tabpanel .picker{background:var(--panel)}
 .em{color:var(--accent-d);font-weight:700}
-.pwform{display:flex;flex-direction:column;gap:var(--s2);max-width:320px;margin-top:var(--s3)}
+.pwwrap{margin:auto;width:min(320px,100%)}
+.pwwrap .hint{text-align:center}
+.pwform{display:flex;flex-direction:column;gap:var(--s2);margin-top:var(--s3)}
 .lock{text-align:center;padding:var(--s7) var(--s3)}
 #printArea{display:none}
 #edge{position:fixed;top:0;right:0;width:16px;height:100%;z-index:45}
@@ -876,7 +878,7 @@ function drawSecret(){
 
   if(mTab==='apart'){
     const hint=el('div','hint');
-    hint.append(document.createTextNode(`같은 그룹으로 묶은 학생들을 서로 떨어뜨려 앉혀요. 규칙은 두 가지예요. ① 사이에 최소 한 ${unit} 두기 (지금 ${G}${unit}이면 한 그룹 최대 ${maxN}명) ② N칸 이상 떨어뜨리기: 옆으로 몇 칸 + 앞뒤로 몇 줄을 더한 거리(우체부 거리)예요. 예) 옆으로 2칸, 뒤로 3줄이면 5칸. `));
+    hint.append(document.createTextNode('같은 그룹으로 묶은 학생들을 서로 떨어뜨려 앉혀요. 규칙은 두 가지예요.'),el('br'),document.createTextNode(`① 사이에 최소 한 ${unit} 두기 (지금 ${G}${unit}이면 한 그룹 최대 ${maxN}명)`),el('br'),document.createTextNode('② N칸 이상 떨어뜨리기: 옆으로 몇 칸 + 앞뒤로 몇 줄을 더한 거리(우체부 거리)예요. 예) 옆으로 2칸, 뒤로 3줄이면 5칸. '));
     hint.append(el('strong','em','랜덤 배치에만 적용돼요.'));
     panel.append(hint);
     const ar=el('div','picker');ar.style.marginTop='12px';
@@ -913,14 +915,14 @@ function drawSecret(){
   }
 
   if(mTab==='pw'){
-    panel.append(el('div','hint','오른쪽 숨김 패널에서 이 설정 창을 열 때 쓰는 비밀번호예요.'));
+    const w=el('div','pwwrap');w.append(el('div','hint','오른쪽 숨김 패널에서 이 설정 창을 열 때 쓰는 비밀번호예요.'));
     const f=el('div','pwform');
     const p1=el('input');p1.type='password';p1.placeholder='새 비밀번호';p1.autocomplete='new-password';
     const p2=el('input');p2.type='password';p2.placeholder='새 비밀번호 확인';p2.autocomplete='new-password';
     const b=el('button','btn','비밀번호 변경');
     const change=()=>{if(!p1.value){toast('새 비밀번호를 입력해 주세요');p1.focus();return;}if(p1.value!==p2.value){toast('두 비밀번호가 서로 달라요');p2.select();return;}S.pw=p1.value;save();toast('비밀번호를 바꿨어요');drawSecret();};
     b.onclick=change;p2.onkeydown=e=>{if(e.key==='Enter')change();};p1.onkeydown=e=>{if(e.key==='Enter')p2.focus();};
-    f.append(p1,p2,b);panel.append(f);
+    f.append(p1,p2,b);w.append(f);panel.append(w);
   }
 
   const x=el('button','btn icon xclose');x.title='닫기';x.setAttribute('aria-label','닫기');
