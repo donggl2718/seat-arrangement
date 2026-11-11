@@ -87,7 +87,7 @@ canvas#fx{position:fixed;inset:0;pointer-events:none;z-index:40}
 @keyframes cnt{0%{transform:scale(2.2);opacity:0}40%{opacity:1}100%{transform:scale(.9);opacity:.9}}
 body.present aside{display:none}
 /* modal */
-.modal{position:fixed;inset:0;background:rgba(30,25,20,.55);display:none;align-items:center;justify-content:center;z-index:60;padding:16px}
+.modal{position:fixed;inset:0;background:rgba(30,25,20,.55);display:none;align-items:flex-start;justify-content:center;z-index:60;padding:6vh 16px 16px}
 .modal.open{display:flex}
 .mbox{background:var(--panel);border-radius:16px;width:min(980px,100%);max-height:94vh;overflow:auto;padding:20px}
 .mbox h3{font-family:var(--serif);margin:0 0 6px;font-size:18px}
@@ -96,9 +96,33 @@ body.present aside{display:none}
 .mroom .grid{gap:6px}
 .picker{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:10px}
 .slist{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px}
+.roles{margin-top:10px}
+.roles label{display:flex;align-items:center;gap:6px;flex:1;min-width:0;font-size:13px}
+.roles select{flex:1;min-width:0;padding:6px}
+.desk .badge{position:absolute;top:5px;left:6px;font-size:max(10px,calc(var(--fs)*.42));font-weight:700;color:#fff;border-radius:999px;padding:1px 7px;line-height:1.5;letter-spacing:.02em}
+.desk.role-p{background:linear-gradient(160deg,#fff4cc,#ffe08a);border:3px solid #d4a017;box-shadow:0 0 0 3px rgba(212,160,23,.25),0 6px 16px rgba(180,130,0,.25)}
+.desk.role-p .badge{background:#c0392b}
+.desk.role-v{background:linear-gradient(160deg,#eef5ff,#d6e6ff);border:3px solid #4f86d9;box-shadow:0 0 0 3px rgba(79,134,217,.2),0 6px 16px rgba(40,90,170,.18)}
+.desk.role-v .badge{background:#2f66b8}
 .chip{background:#fff3cf;border:1px solid var(--gold);border-radius:999px;padding:4px 10px;font-size:13px;display:flex;gap:6px;align-items:center}
 .chip button{border:0;background:none;cursor:pointer;color:#a07400;padding:0}
 .mfoot{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;align-items:center;margin-top:8px}
+.mbox.folder .mfoot{margin-top:auto;padding-top:12px}
+.tabs{display:flex;gap:4px;margin-top:16px;padding-left:10px;align-items:flex-end;position:relative;z-index:1}
+.tab{border:1px solid var(--line);border-bottom:0;background:#ece4d6;border-radius:12px 12px 0 0;padding:8px 18px;cursor:pointer;color:var(--muted);font-family:var(--serif);font-weight:700;font-size:14px;margin-bottom:-1px;transition:background .2s,color .2s,padding .2s}
+.tab:hover{color:var(--ink);background:#f3ede3}
+.tab.on{background:#fff;color:var(--ink);padding-top:11px;padding-bottom:10px}
+.tabpanel{border:1px solid var(--line);background:#fff;border-radius:0 14px 14px 14px;padding:16px 18px;min-height:200px}
+/* 탭 달린 폴더 자체가 팝업 창 */
+.mbox.folder{background:transparent;padding:0;border-radius:0;overflow:visible;max-height:none;display:flex;flex-direction:column}
+.mbox.folder .tabs{margin-top:0;padding-left:14px}
+.mbox.folder .tab{background:#e6dccb;border-color:#d9cdb8}
+.mbox.folder .tab:hover{background:#efe7da}
+.mbox.folder .tab.on{background:var(--panel);border-color:var(--line)}
+.mbox.folder .tabpanel{background:var(--panel);height:min(620px,calc(88vh - 48px));display:flex;flex-direction:column;overflow:auto;box-shadow:0 24px 60px rgba(0,0,0,.35);border-radius:0 16px 16px 16px;padding:20px 22px}
+.tabpanel .picker{background:var(--panel)}
+.em{color:var(--accent-d);font-weight:700}
+.pwform{display:flex;flex-direction:column;gap:8px;max-width:320px;margin-top:12px}
 .lock{text-align:center;padding:40px 10px}
 #printArea{display:none}
 #edge{position:fixed;top:0;right:0;width:14px;height:100%;z-index:45}
@@ -125,6 +149,8 @@ body.present aside{display:none}
   #printArea .desk.empty{background:#f3f3f3}
   #printArea .desk.blocked{background:#fafafa;border:1px dashed #ccc}
   #printArea .desk.secret{background:#fff6d6}
+  #printArea .desk.role-p{background:#fff1c2;border:2.5px solid #d4a017;box-shadow:none}
+  #printArea .desk.role-v{background:#e3eeff;border:2.5px solid #4f86d9;box-shadow:none}
   #printArea .legend{margin-top:3mm;font-size:9.5pt;color:#555}
 }
 </style>
@@ -138,7 +164,12 @@ body.present aside{display:none}
     <h2>학생 명단 <span class="cnt" id="rosterCnt">0명</span></h2>
     <textarea id="roster" placeholder="한 줄에 한 명씩 입력해요.&#10;&#10;1 김민준 의사&#10;2 이서연 웹툰 작가&#10;3 박도윤 교사&#10;…&#10;&#10;번호 / 이름 / 진로희망 순서로 넣어요.&#10;진로희망은 비워 둬도 되고, 번호 없이 이름만 넣으면 순서대로 번호가 붙어요.&#10;엑셀에서 세 칸을 복사해 붙여넣어도 돼요."></textarea>
     <div class="warn" id="rosterWarn"></div>
-    <div class="row"><button class="btn" id="sampleBtn">예시 명단 넣기</button></div>
+    <div class="row"><button class="btn w" id="fileBtn">엑셀·CSV 파일 불러오기</button><button class="btn" id="sampleBtn">예시 명단</button></div>
+    <input type="file" id="fileIn" accept=".xlsx,.csv,.txt" hidden>
+    <div class="row roles">
+      <label>학급회장 <select id="rolePres"></select></label>
+      <label>부회장 <select id="roleVice"></select></label>
+    </div>
   </div>
 
   <div class="sec">
@@ -320,7 +351,7 @@ function renderRoom(container,o){
     else if(o.mystery){d.classList.add('mystery');nm.textContent='?';}
     else{
       const k=o.map&&o.map[s.id];
-      if(k!=null){const st=smap[k];no.textContent=(st?st.no:k)+'번';nm.textContent=st?st.name:'(명단에 없음)';job.textContent=st&&st.job||'';}
+      if(k!=null){const st=smap[k];no.textContent=(st?st.no:k)+'번';nm.textContent=st?st.name:'(명단에 없음)';job.textContent=st&&st.job||'';markRole(d,k);}
       else{d.classList.add('empty');nm.textContent=o.emptyText!=null?o.emptyText:'';}
     }
     if(o.marks&&o.marks.has(s.id)){d.classList.add('secret');d.append(el('span','star','★'));}
@@ -369,8 +400,16 @@ function setSeg(id,val){
   else if(pill.dataset.v!==val){pill.classList.remove('squish');void pill.offsetWidth;pill.classList.add('squish');}
   pill.dataset.at=at;pill.dataset.v=val;
 }
+function markRole(d,k){
+  const R=S.roles||{};const t=k===R.pres?'p':k===R.vice?'v':null;if(!t)return;
+  d.classList.add('role-'+t);d.append(el('span','badge',t==='p'?'회장':'부회장'));
+}
+function fillRoles(){
+  [['#rolePres','pres'],['#roleVice','vice']].forEach(([sel,k])=>{const e=$(sel);e.innerHTML='';e.append(new Option('없음',''));
+    students.forEach(st=>e.append(new Option(`${st.no}번 ${st.name}`,st.key)));e.value=(S.roles&&students.some(st=>st.key===S.roles[k]))?S.roles[k]:'';});
+}
 function refreshInfo(){
-  students=parseRoster(S.roster);
+  students=parseRoster(S.roster);fillRoles();
   $('#rosterCnt').textContent=students.length+'명';
   const L=curLayout();
   let w='';
@@ -408,6 +447,82 @@ function init(){
 }
 const clampN=(v,a,b,d)=>{v=parseInt(v,10);return isNaN(v)?d:Math.min(b,Math.max(a,v));};
 $('#roster').addEventListener('input',e=>{S.roster=e.target.value;save();refreshInfo();drawStage();});
+[['#rolePres','pres','vice'],['#roleVice','vice','pres']].forEach(([sel,k,other])=>$(sel).addEventListener('change',e=>{
+  S.roles=S.roles||{};S.roles[k]=e.target.value||null;if(S.roles[k]&&S.roles[other]===S.roles[k])S.roles[other]=null;save();refreshInfo();drawStage();}));
+
+/* ---------- 엑셀(.xlsx)·CSV 불러오기: 외부 라이브러리 없이 직접 읽음 ---------- */
+$('#fileBtn').addEventListener('click',()=>$('#fileIn').click());
+$('#fileIn').addEventListener('change',async e=>{
+  const f=e.target.files[0];e.target.value='';if(!f)return;
+  try{
+    let rows;
+    if(/\.xlsx$/i.test(f.name))rows=await readXlsx(await f.arrayBuffer());
+    else if(/\.xls$/i.test(f.name)){toast('옛날 .xls 형식은 못 읽어요. 엑셀에서 .xlsx로 저장해 주세요');return;}
+    else rows=parseCsv(await f.text());
+    const lines=rowsToRoster(rows);
+    if(!lines.length){toast('파일에서 학생을 찾지 못했어요');return;}
+    S.roster=lines.join('\n');$('#roster').value=S.roster;save();refreshInfo();drawStage();
+    toast(`${lines.length}명을 불러왔어요`);
+  }catch(err){console.error(err);toast('파일을 읽지 못했어요. 엑셀(.xlsx)이나 CSV인지 확인해 주세요');}
+});
+function parseCsv(text){
+  text=text.replace(/^\ufeff/,'');const rows=[];let row=[],cur='',q=false;
+  for(let i=0;i<text.length;i++){const c=text[i];
+    if(q){if(c==='"'){if(text[i+1]==='"'){cur+='"';i++;}else q=false;}else cur+=c;}
+    else if(c==='"')q=true;else if(c===','||c==='\t'){row.push(cur);cur='';}
+    else if(c==='\n'||c==='\r'){if(c==='\r'&&text[i+1]==='\n')i++;row.push(cur);rows.push(row);row=[];cur='';}
+    else cur+=c;}
+  if(cur||row.length){row.push(cur);rows.push(row);}
+  return rows;
+}
+function rowsToRoster(rows){
+  const out=[];
+  rows.forEach(r=>{
+    const c=r.map(x=>String(x==null?'':x).trim());
+    if(!c.some(Boolean))return;
+    const isHeader=!/^\d+$/.test(c[0])&&/번호|이름|성명|진로|희망|no|name/i.test(c.join(' '));
+    if(isHeader)return;
+    if(/^\d+$/.test(c[0]))out.push([c[0],c[1]||'',c[2]||''].join('\t').replace(/\t+$/,''));
+    else if(c[0])out.push([c[0],c[1]||''].join('\t').replace(/\t+$/,''));
+  });
+  return out;
+}
+async function readXlsx(buf){
+  const u8=new Uint8Array(buf),dv=new DataView(buf),dec=new TextDecoder();
+  let e=u8.length-22;while(e>=0&&dv.getUint32(e,true)!==0x06054b50)e--;
+  if(e<0)throw new Error('zip 아님');
+  const cnt=dv.getUint16(e+10,true);let off=dv.getUint32(e+16,true);const files={};
+  for(let i=0;i<cnt;i++){
+    const method=dv.getUint16(off+10,true),csize=dv.getUint32(off+20,true),nl=dv.getUint16(off+28,true),xl=dv.getUint16(off+30,true),cl=dv.getUint16(off+32,true),lho=dv.getUint32(off+42,true);
+    files[dec.decode(u8.subarray(off+46,off+46+nl))]={method,csize,lho};off+=46+nl+xl+cl;
+  }
+  const get=async name=>{const f=files[name];if(!f)return null;const l=f.lho;const s0=l+30+dv.getUint16(l+26,true)+dv.getUint16(l+28,true);
+    const data=u8.subarray(s0,s0+f.csize);if(f.method===0)return dec.decode(data);
+    return await new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).text();};
+  const xml=t=>new DOMParser().parseFromString(t,'application/xml');
+  const tags=(d,n)=>Array.from(d.getElementsByTagNameNS('*',n));
+  // 첫 번째 시트 찾기
+  let sheet=null;
+  const wb=await get('xl/workbook.xml'),rels=await get('xl/_rels/workbook.xml.rels');
+  if(wb&&rels){const first=tags(xml(wb),'sheet')[0];
+    const rid=first&&(first.getAttribute('r:id')||first.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships','id'));
+    const rel=tags(xml(rels),'Relationship').find(x=>x.getAttribute('Id')===rid);
+    if(rel){let t=rel.getAttribute('Target');t=t.startsWith('/')?t.slice(1):'xl/'+t;sheet=t;}}
+  if(!sheet||!files[sheet])sheet=Object.keys(files).filter(n=>/^xl\/worksheets\/sheet\d+\.xml$/.test(n)).sort()[0];
+  const ssT=await get('xl/sharedStrings.xml');
+  const ss=ssT?tags(xml(ssT),'si').map(si=>tags(si,'t').map(t=>t.textContent).join('')):[];
+  const sd=xml(await get(sheet));const rows=[];
+  tags(sd,'row').forEach(row=>{const r=[];
+    tags(row,'c').forEach(c=>{const ref=c.getAttribute('r')||'';const letters=(ref.match(/^[A-Z]+/)||['A'])[0];
+      let col=0;for(const ch of letters)col=col*26+(ch.charCodeAt(0)-64);col--;
+      const t=c.getAttribute('t'),v=tags(c,'v')[0];let val='';
+      if(t==='s')val=ss[parseInt(v&&v.textContent,10)]||'';
+      else if(t==='inlineStr')val=tags(c,'t').map(x=>x.textContent).join('');
+      else if(v){val=v.textContent;if(t!=='str'&&/^-?\d+(\.\d+)?(E-?\d+)?$/i.test(val)){const n=parseFloat(val);if(Number.isInteger(n))val=String(n);}}
+      r[col]=val;});
+    rows.push(r);});
+  return rows;
+}
 [['#exCols','exam','cols'],['#exRows','exam','rows'],['#prRows','pair','rows']].forEach(([sel,m,k])=>{
   $(sel).addEventListener('change',e=>{const max=k==='groups'?6:12;S[m][k]=clampN(e.target.value,1,max,S[m][k]);e.target.value=S[m][k];selected=null;save();refreshInfo();drawStage();});
 });
@@ -449,7 +564,8 @@ let rzT;window.addEventListener('resize',()=>{clearTimeout(rzT);rzT=setTimeout((
 function apartGroups(smap){return (S.apart||[]).map(g=>({type:g.type,n:g.n,keys:g.keys.filter(k=>smap[k])})).filter(g=>g.keys.length>1);}
 function computeArrangement(){
   const L=curLayout();const smap=studentMap(students);
-  const map=validSecrets(L,smap);const used=new Set(Object.values(map));
+  // 지정석은 랜덤 배치에서만 적용 (번호순은 순서 그대로)
+  const map=S.order==='random'?validSecrets(L,smap):{};const used=new Set(Object.values(map));
   let rest=students.filter(s=>!used.has(s.key));
   let free=(S.order==='random'?orderSeats(L,'row'):orderSeats(L,S.dir)).filter(s=>!s.blocked&&map[s.id]==null);
   if(S.order!=='random'){const m=Object.assign({},map);rest.forEach((st,i)=>{m[free[i].id]=st.key;});return {L,map:m,conf:0};}
@@ -521,7 +637,7 @@ async function go(){
   const reveal=(s,i,withSound)=>{
     const d=desks[s.id];pending.delete(s.id);d.classList.remove('mystery');
     const st=smap[map[s.id]];d.querySelector('.no').textContent=st.no+'번';d.querySelector('.nm').textContent=st.name;d.querySelector('.job').textContent=st.job||'';
-    d.classList.add('pop');if(withSound)ding(i);
+    markRole(d,map[s.id]);d.classList.add('pop');if(withSound)ding(i);
   };
   const rs=Date.now();
   for(let i=0;i<order.length;i++){if(skip)break;if(pending.has(order[i].id))reveal(order[i],i,true);const w=rs+(i+1)*step-Date.now();if(w>0)await sleep(w);}
@@ -598,8 +714,8 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(drawer.classList
 document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement){document.body.classList.remove('present');setTimeout(drawStage,120);}});
 
 /* ---------- secret seats ---------- */
-let unlocked=false,mSel=null;
-function openSecret(){refreshInfo();unlocked=true;mSel=null;$('#secretModal').classList.add('open');drawSecret();}
+let unlocked=false,mSel=null,mTab='seat';
+function openSecret(){refreshInfo();unlocked=true;mSel=null;mTab='seat';$('#secretModal').classList.add('open');drawSecret();}
 function closeSecret(){$('#secretModal').classList.remove('open');unlocked=false;$('#secretBox').innerHTML='';}
 /* 오른쪽 끝 숨김 패널: 가장자리에 0.7초 머무르면 열리고, 비밀번호가 맞아야 지정석 설정이 열림 */
 let edgeT=null,leaveT=null;
@@ -625,9 +741,9 @@ function drawDrawer(){
 }
 $('#secretModal').addEventListener('click',e=>{if(e.target.id==='secretModal')closeSecret();});
 function drawSecret(){
-  const box=$('#secretBox');box.innerHTML='';
+  const box=$('#secretBox');box.innerHTML='';box.classList.remove('folder');
   if(!unlocked){
-    const lk=el('div','lock');lk.append(el('h3',null,'🔒 비밀번호를 입력해 주세요'));
+    const lk=el('div','lock');lk.append(el('h3',null,'비밀번호를 입력해 주세요'));
     const inp=el('input');inp.type='password';inp.placeholder='비밀번호';inp.style.margin='12px 0';
     const ok=el('button','btn','열기');const cancel=el('button','btn','닫기');
     const tryOpen=()=>{if(inp.value===S.pw){unlocked=true;drawSecret();}else{toast('비밀번호가 달라요');inp.select();}};
@@ -636,69 +752,93 @@ function drawSecret(){
   }
   const L=curLayout();const smap=studentMap(students);
   const sec=S.secrets[L.mode];
-  box.append(el('h3',null,`🔒 지정석 설정 · ${L.mode==='pair'?'짝꿍 분단':'시험 대형'}`));
-  box.append(el('div','hint','책상을 클릭하고 앉힐 학생을 고르세요. 지정한 학생은 랜덤·번호순 어느 쪽이든 항상 그 자리에 앉고, 배치 애니메이션과 학생용 인쇄물에는 전혀 티가 나지 않아요. (시험 대형과 짝꿍 분단은 따로 저장돼요)'));
-  const mroom=el('div','room mroom');box.append(mroom);
-  const vm={};Object.entries(sec).forEach(([id,k])=>{if(smap[k])vm[id]=k;});
-  const grid=renderRoom(mroom,{layout:L,map:vm,students:smap,view:'student',clickable:true,selected:mSel,emptyText:'·'});
-  grid.addEventListener('click',e=>{const d=e.target.closest('.desk');if(!d||d.classList.contains('blocked'))return;mSel=d.dataset.id;drawSecret();});
-  const pk=el('div','picker');
-  if(mSel){
-    const s=L.seats.find(x=>x.id===mSel);
-    pk.append(el('b',null,`${L.mode==='pair'?(s.group+1)+'분단 '+(s.row+1)+'번째 줄 '+(s.side?'오른쪽':'왼쪽'):(s.col+1)+'열 '+(s.row+1)+'번째 줄'} 자리:`));
-    const selEl=el('select');selEl.append(new Option('— 지정 안 함 —',''));
-    students.forEach(st=>{const where=Object.keys(sec).find(id=>sec[id]===st.key&&id!==mSel);selEl.append(new Option(`${st.no}번 ${st.name}${where?' (다른 자리에 지정됨)':''}`,st.key));});
-    selEl.value=sec[mSel]&&smap[sec[mSel]]?sec[mSel]:'';
-    selEl.onchange=()=>{const k=selEl.value;Object.keys(sec).forEach(id=>{if(sec[id]===k)delete sec[id];});if(k)sec[mSel]=k;else delete sec[mSel];save();drawSecret();};
-    pk.append(selEl);
-  }else pk.append(el('span','hint','위 배치도에서 책상을 먼저 클릭하세요.'));
-  box.append(pk);
-  const list=el('div','slist');const ents=Object.entries(vm);
-  if(!ents.length)list.append(el('span','hint','아직 지정한 자리가 없어요.'));
-  ents.forEach(([id,k])=>{const c=el('span','chip');c.append(document.createTextNode(`${smap[k].no}번 ${smap[k].name}`));const x=el('button',null,'✕');x.title='해제';x.onclick=()=>{delete sec[id];save();drawSecret();};c.append(x);list.append(c);});
-  box.append(list);
-  // ---- 떨어뜨려 앉힐 학생
   const G=L.groups,maxN=Math.ceil(G/2),unit=L.mode==='pair'?'분단':'열';
-  const ah=el('h3',null,'떨어뜨려 앉힐 학생');ah.style.marginTop='14px';box.append(ah);
-  box.append(el('div','hint',`같은 그룹으로 묶은 학생들을 서로 떨어뜨려 앉혀요. 규칙은 두 가지예요. ① 사이에 최소 한 ${unit} 두기 (지금 ${G}${unit}이면 한 그룹 최대 ${maxN}명) ② N칸 이상 떨어뜨리기: 옆으로 몇 칸 + 앞뒤로 몇 줄을 더한 거리(우체부 거리)예요. 예) 옆으로 2칸, 뒤로 3줄이면 5칸. 랜덤 배치에 적용되고, 화면이나 인쇄물에는 드러나지 않아요.`));
-  const al=el('div');al.style.margin='8px 0';
-  (S.apart||[]).forEach((grp,gi)=>{
-    const line=el('div','slist');line.style.margin='4px 0';line.style.alignItems='center';
-    line.append(el('b',null,`그룹 ${gi+1}`));
-    line.append(el('span','hint',grp.type==='dist'?`(${grp.n}칸 이상)`:`(한 ${unit} 이상 사이)`));
-    const valid=grp.keys.filter(k=>smap[k]);
-    valid.forEach(k=>{const c=el('span','chip');c.append(document.createTextNode(`${smap[k].no}번 ${smap[k].name}`));const x=el('button',null,'✕');x.title='빼기';x.onclick=()=>{grp.keys.splice(grp.keys.indexOf(k),1);if(grp.keys.length<2)S.apart.splice(gi,1);save();drawSecret();};c.append(x);line.append(c);});
-    const del=el('button','btn','그룹 삭제');del.style.padding='3px 8px';del.onclick=()=>{S.apart.splice(gi,1);save();drawSecret();};line.append(del);
-    if(grp.type!=='dist'&&valid.length>maxN){const w=el('span','warn',`${maxN}명이 넘어서 모두 떨어뜨릴 수는 없어요`);w.style.margin='0';line.append(w);}
-    al.append(line);
-  });
-  if(!(S.apart||[]).length)al.append(el('span','hint','아직 묶은 학생이 없어요.'));
-  box.append(al);
-  const ar=el('div','picker');
-  const ain=el('input');ain.type='text';ain.placeholder='번호나 이름을 쉼표·띄어쓰기로 구분 (예: 3, 7, 김민준)';ain.style.flex='1';ain.style.minWidth='240px';
-  const atype=el('select');atype.append(new Option(`한 ${unit} 이상 사이에 두기`,'group'),new Option('칸 수 이상 떨어뜨리기','dist'));
-  const anum=el('input');anum.type='number';anum.min='2';anum.max='20';anum.value='4';anum.style.width='60px';
-  const aunit=el('span',null,'칸 이상');
-  const syncT=()=>{const d=atype.value==='dist';anum.style.display=d?'':'none';aunit.style.display=d?'':'none';};atype.onchange=syncT;
-  const aadd=el('button','btn','새 그룹으로 추가');
-  const addGroup=()=>{
-    const toks=ain.value.split(/[,\s]+/).map(t=>t.replace(/번$/,'')).filter(Boolean);const keys=[],bad=[];
-    toks.forEach(t=>{let st=smap[t]||students.find(x=>x.name===t);if(st){if(!keys.includes(st.key))keys.push(st.key);}else bad.push(t);});
-    if(bad.length){toast(`명단에서 찾지 못했어요: ${bad.join(', ')}`);return;}
-    if(keys.length<2){toast('두 명 이상 넣어 주세요');return;}
-    const g={keys,type:atype.value};if(g.type==='dist')g.n=clampN(anum.value,2,20,4);
-    S.apart.push(g);save();drawSecret();
-  };
-  aadd.onclick=addGroup;ain.onkeydown=e=>{if(e.key==='Enter')addGroup();};
-  ar.append(ain,atype,anum,aunit,aadd);syncT();box.append(ar);
-  if(S.apartFail>0&&arrValid())box.append(el('div','warn',`지금 배치에서는 빈자리·지정석 때문에 ${S.apartFail}쌍을 충분히 떨어뜨리지 못했어요. 다시 배치하거나 손으로 바꿔 주세요.`));
+  box.classList.add('folder');
+  // ---- 폴더 탭
+  const TABS=[['seat','지정석 설정'],['apart','떨어뜨려 앉힐 학생'],['pw','비밀번호']];
+  const tabs=el('div','tabs');
+  TABS.forEach(([k,label])=>{const t=el('button','tab'+(mTab===k?' on':''),label);t.onclick=()=>{if(mTab!==k){mTab=k;drawSecret();}};tabs.append(t);});
+  const panel=el('div','tabpanel');box.append(tabs,panel);
+
+  if(mTab==='seat'){
+    const sh=el('div','hint');
+    sh.append(document.createTextNode('책상을 클릭하고 앉힐 학생을 고르세요. '),el('strong','em','랜덤 배치에서만 지정한 자리에 앉아요.'),document.createTextNode(' 번호순으로 배치하면 지정석은 무시돼요. (시험 대형과 짝꿍 분단은 따로 저장돼요)'));
+    panel.append(sh);
+    const mroom=el('div','room mroom');panel.append(mroom);
+    const vm={};Object.entries(sec).forEach(([id,k])=>{if(smap[k])vm[id]=k;});
+    const grid=renderRoom(mroom,{layout:L,map:vm,students:smap,view:'student',clickable:true,selected:mSel,emptyText:'·'});
+    grid.addEventListener('click',e=>{const d=e.target.closest('.desk');if(!d||d.classList.contains('blocked'))return;mSel=d.dataset.id;drawSecret();});
+    const pk=el('div','picker');
+    if(mSel){
+      const s=L.seats.find(x=>x.id===mSel);
+      pk.append(el('b',null,`${L.mode==='pair'?(s.group+1)+'분단 '+(s.row+1)+'번째 줄 '+(s.side?'오른쪽':'왼쪽'):(s.col+1)+'열 '+(s.row+1)+'번째 줄'} 자리:`));
+      const selEl=el('select');selEl.append(new Option('— 지정 안 함 —',''));
+      students.forEach(st=>{const where=Object.keys(sec).find(id=>sec[id]===st.key&&id!==mSel);selEl.append(new Option(`${st.no}번 ${st.name}${where?' (다른 자리에 지정됨)':''}`,st.key));});
+      selEl.value=sec[mSel]&&smap[sec[mSel]]?sec[mSel]:'';
+      selEl.onchange=()=>{const k=selEl.value;Object.keys(sec).forEach(id=>{if(sec[id]===k)delete sec[id];});if(k)sec[mSel]=k;else delete sec[mSel];save();drawSecret();};
+      pk.append(selEl);
+    }else pk.append(el('span','hint','위 배치도에서 책상을 먼저 클릭하세요.'));
+    panel.append(pk);
+    const list=el('div','slist');const ents=Object.entries(vm);
+    if(!ents.length)list.append(el('span','hint','아직 지정한 자리가 없어요.'));
+    ents.forEach(([id,k])=>{const c=el('span','chip');c.append(document.createTextNode(`${smap[k].no}번 ${smap[k].name}`));const x=el('button',null,'✕');x.title='해제';x.onclick=()=>{delete sec[id];save();drawSecret();};c.append(x);list.append(c);});
+    const row=el('div','row');row.style.alignItems='flex-start';list.style.flex='1';list.style.margin='0';
+    const clr=el('button','btn','모두 해제');clr.onclick=()=>{if(!confirmInline())return;S.secrets[L.mode]={};save();drawSecret();};
+    row.append(list,clr);panel.append(row);
+  }
+
+  if(mTab==='apart'){
+    const hint=el('div','hint');
+    hint.append(document.createTextNode(`같은 그룹으로 묶은 학생들을 서로 떨어뜨려 앉혀요. 규칙은 두 가지예요. ① 사이에 최소 한 ${unit} 두기 (지금 ${G}${unit}이면 한 그룹 최대 ${maxN}명) ② N칸 이상 떨어뜨리기: 옆으로 몇 칸 + 앞뒤로 몇 줄을 더한 거리(우체부 거리)예요. 예) 옆으로 2칸, 뒤로 3줄이면 5칸. `));
+    hint.append(el('strong','em','랜덤 배치에만 적용돼요.'));
+    panel.append(hint);
+    const ar=el('div','picker');ar.style.marginTop='12px';
+    const atype=el('select');atype.append(new Option(`한 ${unit} 이상 사이에 두기`,'group'),new Option('칸 수 이상 떨어뜨리기','dist'));
+    const anum=el('input');anum.type='number';anum.min='2';anum.max='20';anum.value='4';anum.style.width='60px';
+    const aunit=el('span',null,'칸 이상');
+    const syncT=()=>{const d=atype.value==='dist';anum.style.display=d?'':'none';aunit.style.display=d?'':'none';};atype.onchange=syncT;
+    const ain=el('input');ain.type='text';ain.placeholder='번호나 이름을 쉼표·띄어쓰기로 구분 (예: 3, 7, 김민준)';ain.style.flex='1';ain.style.minWidth='240px';
+    const aadd=el('button','btn','새 그룹으로 추가');
+    const addGroup=()=>{
+      const toks=ain.value.split(/[,\s]+/).map(t=>t.replace(/번$/,'')).filter(Boolean);const keys=[],bad=[];
+      toks.forEach(t=>{let st=smap[t]||students.find(x=>x.name===t);if(st){if(!keys.includes(st.key))keys.push(st.key);}else bad.push(t);});
+      if(bad.length){toast(`명단에서 찾지 못했어요: ${bad.join(', ')}`);return;}
+      if(keys.length<2){toast('두 명 이상 넣어 주세요');return;}
+      const g={keys,type:atype.value};if(g.type==='dist')g.n=clampN(anum.value,2,20,4);
+      S.apart.push(g);save();drawSecret();
+    };
+    aadd.onclick=addGroup;ain.onkeydown=e=>{if(e.key==='Enter')addGroup();};
+    ar.append(atype,anum,aunit,ain,aadd);syncT();panel.append(ar);
+    const al=el('div');al.style.margin='4px 0';
+    (S.apart||[]).forEach((grp,gi)=>{
+      const line=el('div','slist');line.style.margin='4px 0';line.style.alignItems='center';
+      line.append(el('b',null,`그룹 ${gi+1}`));
+      line.append(el('span','hint',grp.type==='dist'?`(${grp.n}칸 이상)`:`(한 ${unit} 이상 사이)`));
+      const valid=grp.keys.filter(k=>smap[k]);
+      valid.forEach(k=>{const c=el('span','chip');c.append(document.createTextNode(`${smap[k].no}번 ${smap[k].name}`));const x=el('button',null,'✕');x.title='빼기';x.onclick=()=>{grp.keys.splice(grp.keys.indexOf(k),1);if(grp.keys.length<2)S.apart.splice(gi,1);save();drawSecret();};c.append(x);line.append(c);});
+      const del=el('button','btn','그룹 삭제');del.style.padding='3px 8px';del.onclick=()=>{S.apart.splice(gi,1);save();drawSecret();};line.append(del);
+      if(grp.type!=='dist'&&valid.length>maxN){const w=el('span','warn',`${maxN}명이 넘어서 모두 떨어뜨릴 수는 없어요`);w.style.margin='0';line.append(w);}
+      al.append(line);
+    });
+    if(!(S.apart||[]).length)al.append(el('span','hint','아직 묶은 학생이 없어요.'));
+    panel.append(al);
+    if(S.apartFail>0&&arrValid())panel.append(el('div','warn',`지금 배치에서는 빈자리·지정석 때문에 ${S.apartFail}쌍을 충분히 떨어뜨리지 못했어요. 다시 배치하거나 손으로 바꿔 주세요.`));
+  }
+
+  if(mTab==='pw'){
+    panel.append(el('div','hint','오른쪽 숨김 패널에서 이 설정 창을 열 때 쓰는 비밀번호예요.'));
+    const f=el('div','pwform');
+    const p1=el('input');p1.type='password';p1.placeholder='새 비밀번호';p1.autocomplete='new-password';
+    const p2=el('input');p2.type='password';p2.placeholder='새 비밀번호 확인';p2.autocomplete='new-password';
+    const b=el('button','btn','비밀번호 변경');
+    const change=()=>{if(!p1.value){toast('새 비밀번호를 입력해 주세요');p1.focus();return;}if(p1.value!==p2.value){toast('두 비밀번호가 서로 달라요');p2.select();return;}S.pw=p1.value;save();toast('비밀번호를 바꿨어요');drawSecret();};
+    b.onclick=change;p2.onkeydown=e=>{if(e.key==='Enter')change();};p1.onkeydown=e=>{if(e.key==='Enter')p2.focus();};
+    f.append(p1,p2,b);panel.append(f);
+  }
+
   const foot=el('div','mfoot');
-  const pw=el('input');pw.type='password';pw.placeholder='새 비밀번호';pw.style.width='200px';
-  const pwBtn=el('button','btn','비밀번호 변경');pwBtn.onclick=()=>{if(!pw.value){toast('새 비밀번호를 입력해 주세요');return;}S.pw=pw.value;save();toast('비밀번호를 바꿨어요');drawSecret();};
-  const clr=el('button','btn','모두 해제');clr.onclick=()=>{if(!confirmInline())return;S.secrets[L.mode]={};save();drawSecret();};
   const close=el('button','btn','닫기');close.style.background='var(--accent)';close.style.color='#fff';close.style.border='0';close.onclick=closeSecret;
-  const sp=el('div');sp.style.flex='1';
-  foot.append(pw,pwBtn,sp,clr,close);box.append(foot);
+  foot.append(close);panel.append(foot);
 }
 
 init();
