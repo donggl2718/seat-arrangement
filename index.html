@@ -60,6 +60,13 @@ input[type=number]{width:64px;padding:0 var(--s2)}
 .btn.go{background:var(--accent);color:#fff;border:0;font-family:var(--serif);font-weight:700;font-size:15px;box-shadow:0 4px 0 var(--accent-d)}
 .btn.go:hover{background:#ff7a5c}
 .btn.w{flex:1}
+.dims{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2)}
+.dims.one{grid-template-columns:1fr}
+.dim input[type=number]::-webkit-inner-spin-button,.dim input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.dim input[type=number]{-moz-appearance:textfield;appearance:textfield}
+.dim{min-width:0;display:flex;align-items:center;gap:var(--s2);height:var(--ctl);padding:0 var(--s3);border:1px solid var(--line);border-radius:var(--r);background:#fff;font-size:13px;color:var(--muted);cursor:text;transition:border-color .15s,box-shadow .15s}
+.dim:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(255,107,74,.15)}
+.dim input[type=number]{flex:1;min-width:0;width:auto;height:100%;border:0;padding:0;background:transparent;text-align:center;font-size:15px;font-weight:500;color:var(--ink);outline:none}
 .btn.on{background:var(--blue);color:#fff;border-color:var(--blue)}
 .btn.ghost{border-color:transparent;background:transparent;color:var(--muted)}
 .btn.ghost:hover{background:var(--empty);color:var(--ink)}
@@ -231,13 +238,13 @@ body.present aside,body.nopanel aside{display:none}
     <h2><span class="step">2.</span>자리 모양<span class="cnt" id="layoutCnt"></span><span class="chev"></span></h2>
     <div class="body">
       <div class="seg" id="modeSeg"><button data-v="exam">시험 대형</button><button data-v="pair">짝꿍 분단</button></div>
-      <div id="examCfg" class="row">
-        <label>가로 <input type="number" id="exCols" min="1" max="12"> 열</label>
-        <label>세로 <input type="number" id="exRows" min="1" max="12"> 줄</label>
+      <div id="examCfg" class="dims">
+        <label class="dim"><span>가로</span><input type="number" id="exCols" min="1" max="12"><span>열</span></label>
+        <label class="dim"><span>세로</span><input type="number" id="exRows" min="1" max="12"><span>줄</span></label>
       </div>
       <div id="pairCfg">
         <div class="seg" id="groupSeg"><button data-v="2">2분단</button><button data-v="3">3분단</button><button data-v="4">4분단</button><button data-v="5">5분단</button><button data-v="6">6분단</button></div>
-        <div class="row" style="margin-top:var(--s2)"><label>세로 <input type="number" id="prRows" min="1" max="12"> 줄</label></div>
+        <div class="dims one" style="margin-top:var(--s2)"><label class="dim"><span>세로</span><input type="number" id="prRows" min="1" max="12"><span>줄</span></label></div>
       </div>
       <div class="fitrow" id="fitRow"></div>
       <div class="row"><button class="btn w" id="blockBtn">비워 둘 자리 고르기</button><button class="btn" id="blockClr" title="빈자리 지정 모두 해제">초기화</button></div>
@@ -273,8 +280,7 @@ body.present aside,body.nopanel aside{display:none}
     <h2><span class="step">5.</span>인쇄·발표<span class="chev"></span></h2>
     <div class="body">
       <div class="row"><button class="btn w" id="printS">학생용 인쇄</button><button class="btn w" id="printT">교사용 인쇄</button></div>
-      <button class="btn" id="presentBtn">발표 모드 (전체 화면)</button>
-      <div class="hint">발표 모드에서는 설정 패널이 숨겨지고, 위쪽의 시작 버튼으로 배치할 수 있어요. <b>Esc</b>로 돌아와요.</div>
+      <button class="btn" id="presentBtn" data-tip="발표 모드에서는 설정 패널이 숨겨지고, 위쪽의 시작 버튼으로 배치할 수 있어요. Esc로 돌아와요.">발표 모드 (전체 화면)</button>
     </div>
   </div>
 </aside>
@@ -482,7 +488,7 @@ function refreshInfo(){
   if(students.dup&&students.dup.length)w+=`번호가 겹쳐요: ${[...new Set(students.dup)].join(', ')}번 (뒤에 나온 줄은 빠졌어요) `;
   if(students.length>L.open.length)w+=`좌석이 ${students.length-L.open.length}개 부족해요. 열·줄 수를 늘리거나 비운 자리를 줄여 주세요.`;
   $('#rosterWarn').textContent=w;
-  $('#examCfg').style.display=S.mode==='exam'?'flex':'none';
+  $('#examCfg').style.display=S.mode==='exam'?'grid':'none';
   $('#pairCfg').style.display=S.mode==='pair'?'block':'none';
   // 요약 + 알맞은 줄 수 추천
   $('#layoutCnt').textContent=S.mode==='pair'?`짝꿍 ${S.pair.groups}분단 × ${S.pair.rows}줄`:`시험 ${S.exam.cols}열 × ${S.exam.rows}줄`;
