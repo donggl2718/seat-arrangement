@@ -515,7 +515,7 @@ function refreshInfo(){
   $('#avoidInfo').innerHTML='';
   $('#avoidInfo').title=h.length?`최근 기록: ${h[h.length-1].date}`:'짝꿍 배치를 하면 자동으로 기록돼요';
   $('#avoidInfo').append(document.createTextNode(h.length?`기록 ${h.length}회`:'아직 기록 없음'));
-  if(S.pairHist.length){$('#avoidInfo').append(document.createTextNode(' · '));const a=el('button','link','기록 지우기');a.onclick=()=>{if(!confirmInline())return;S.pairHist=[];save();refreshInfo();toast('짝 기록을 지웠어요');};$('#avoidInfo').append(a);}
+  if(S.pairHist.length){$('#avoidInfo').append(document.createTextNode(' · '));const a=el('button','link','기록 지우기');a.onclick=()=>{if(!confirmInline('hist','짝 기록을 모두 지워요. 한 번 더 누르면 지워요.'))return;S.pairHist=[];save();refreshInfo();toast('짝 기록을 지웠어요');};$('#avoidInfo').append(a);}
   setSeg('groupSeg',String(S.pair.groups));
   $('#blockBtn').textContent=editBlocked?'다 골랐어요':'비워 둘 자리 고르기';$('#blockBtn').classList.toggle('on',editBlocked);
   $('#titleView').textContent=(S.className?S.className+' ':'')+'자리 배치';
@@ -636,13 +636,13 @@ $('#blockClr').addEventListener('click',()=>{if(running)return;S.blocked[S.mode]
 document.querySelectorAll('#musicSeg button').forEach(b=>b.addEventListener('click',()=>{S.music=b.dataset.v==='on';save();setSeg('musicSeg',b.dataset.v);if(!S.music)stopMusic();}));
 $('#dur').addEventListener('change',e=>{S.dur=clampN(e.target.value,3,120,10);e.target.value=S.dur;save();});
 $('#sampleBtn').addEventListener('click',()=>{
-  if(S.roster.trim()&&!confirmInline())return;
+  if(S.roster.trim()&&!confirmInline('sample','지금 명단을 덮어써요. 한 번 더 누르면 바꿔요.'))return;
   const names=['김민준','이서연','박도윤','최지우','정하준','강서윤','조은우','윤하은','장시우','임지민','한유준','오수아','서지호','신예린','권도현','황채원','안주원','송다은','류건우','홍지아','전우진','고나연','문태윤','양서아','손민재','배소율','백승현','허윤서'];
   const jobs=['의사','웹툰 작가','교사','프로게이머','간호사','경찰관','요리사','건축가','유튜버','수의사','소방관','디자이너','개발자','변호사','','약사','기자','항공 정비사','작곡가','물리치료사','회계사','','배우','군인','로봇 공학자','사회복지사','','파일럿'];
   S.roster=names.map((n,i)=>`${i+1}\t${n}\t${jobs[i]||''}`).join('\n');$('#roster').value=S.roster;save();refreshInfo();drawStage();
 });
-let confirmArm=0;
-function confirmInline(){if(Date.now()-confirmArm<3000)return true;confirmArm=Date.now();toast('지금 명단을 덮어써요. 한 번 더 누르면 바꿔요.');return false;}
+let confirmArm=0,confirmKey='';
+function confirmInline(key,msg){if(confirmKey===key&&Date.now()-confirmArm<3000){confirmKey='';return true;}confirmKey=key;confirmArm=Date.now();toast(msg);return false;}
 
 $('#stageRoom').addEventListener('click',e=>{
   if(running)return;
@@ -886,7 +886,7 @@ function drawSecret(){
     if(!ents.length)list.append(el('span','hint','아직 지정한 자리가 없어요.'));
     ents.forEach(([id,k])=>{const c=el('span','chip');c.append(document.createTextNode(`${smap[k].no}번 ${smap[k].name}`));const x=el('button',null,'✕');x.title='해제';x.onclick=()=>{delete sec[id];save();drawSecret();};c.append(x);list.append(c);});
     const row=el('div','row');row.style.alignItems='flex-start';list.style.flex='1';list.style.margin='0';
-    const clr=el('button','btn','모두 해제');clr.onclick=()=>{if(!confirmInline())return;S.secrets[L.mode]={};save();drawSecret();};
+    const clr=el('button','btn','모두 해제');clr.onclick=()=>{if(!confirmInline('secrets','지정석을 모두 해제해요. 한 번 더 누르면 해제해요.'))return;S.secrets[L.mode]={};save();drawSecret();toast('지정석을 모두 해제했어요');};
     row.append(list,clr);panel.append(row);
   }
 
