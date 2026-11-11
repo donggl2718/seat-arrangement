@@ -62,6 +62,8 @@ input[type=number]{width:64px;padding:0 var(--s2)}
 .btn.w{flex:1}
 .dims{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2)}
 .dims.one{grid-template-columns:1fr}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2) var(--s3);align-items:center}
+.optlabel{font-size:13px;color:var(--ink)}
 .dim input[type=number]::-webkit-inner-spin-button,.dim input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 .dim input[type=number]{-moz-appearance:textfield;appearance:textfield}
 .dim{min-width:0;display:flex;align-items:center;gap:var(--s2);height:var(--ctl);padding:0 var(--s3);border:1px solid var(--line);border-radius:var(--r);background:#fff;font-size:13px;color:var(--muted);cursor:text;transition:border-color .15s,box-shadow .15s}
@@ -268,9 +270,11 @@ body.present aside,body.nopanel aside{display:none}
   <div class="sec" data-k="go">
     <h2><span class="step">4.</span>배치하기<span class="chev"></span></h2>
     <div class="body">
-      <div class="row">
-        <label><input type="checkbox" id="music"> 음악·효과음</label>
-        <label style="margin-left:auto">애니메이션 <input type="number" id="dur" min="3" max="120" step="1"> 초</label>
+      <div class="opts">
+        <span class="optlabel">음악·효과음</span>
+        <div class="seg" id="musicSeg"><button data-v="on">ON</button><button data-v="off">OFF</button></div>
+        <span class="optlabel">애니메이션</span>
+        <label class="dim"><input type="number" id="dur" min="3" max="120" step="1"><span>초</span></label>
       </div>
       <button class="btn big" id="goBtn" data-tip="배치 후 책상 두 개를 차례로 클릭하면 서로 자리를 바꿀 수 있어요.">자리 배치 시작</button>
     </div>
@@ -511,7 +515,7 @@ function refreshInfo(){
   setSeg('groupSeg',String(S.pair.groups));
   $('#blockBtn').textContent=editBlocked?'다 골랐어요':'비워 둘 자리 고르기';$('#blockBtn').classList.toggle('on',editBlocked);
   $('#titleView').textContent=(S.className?S.className+' ':'')+'자리 배치';
-  setSeg('modeSeg',S.mode);setSeg('orderSeg',S.order);setSeg('dirSeg',S.dir);setSeg('viewSeg',S.view);
+  setSeg('modeSeg',S.mode);setSeg('orderSeg',S.order);setSeg('dirSeg',S.dir);setSeg('viewSeg',S.view);setSeg('musicSeg',S.music?'on':'off');
 }
 function today(){const d=new Date();return `${d.getFullYear()}. ${d.getMonth()+1}. ${d.getDate()}.`;}
 function drawStage(){
@@ -526,7 +530,7 @@ function drawStage(){
 function init(){
   $('#roster').value=S.roster;
   $('#exCols').value=S.exam.cols;$('#exRows').value=S.exam.rows;$('#avoid').checked=S.avoid;$('#avoidN').value=S.avoidN;$('#prRows').value=S.pair.rows;
-  $('#music').checked=S.music;$('#dur').value=S.dur||10;
+  $('#dur').value=S.dur||10;
   S.closed=S.closed||{};
   document.querySelectorAll('.sec[data-k]').forEach(sec=>{const k=sec.dataset.k;sec.classList.toggle('closed',!!S.closed[k]);
     sec.querySelector('h2').addEventListener('click',()=>{S.closed[k]=!S.closed[k];sec.classList.toggle('closed',S.closed[k]);save();refreshInfo();});});
@@ -625,7 +629,7 @@ $('#avoid').addEventListener('change',e=>{S.avoid=e.target.checked;save();});
 $('#avoidN').addEventListener('change',e=>{S.avoidN=e.target.value;save();});
 $('#blockBtn').addEventListener('click',()=>{if(running)return;editBlocked=!editBlocked;selected=null;refreshInfo();drawStage();});
 $('#blockClr').addEventListener('click',()=>{if(running)return;S.blocked[S.mode]={};save();refreshInfo();drawStage();toast('비워 둔 자리를 모두 해제했어요');});bindSeg('orderSeg','order');bindSeg('dirSeg','dir');bindSeg('viewSeg','view');
-$('#music').addEventListener('change',e=>{S.music=e.target.checked;save();if(!S.music)stopMusic();});
+document.querySelectorAll('#musicSeg button').forEach(b=>b.addEventListener('click',()=>{S.music=b.dataset.v==='on';save();setSeg('musicSeg',b.dataset.v);if(!S.music)stopMusic();}));
 $('#dur').addEventListener('change',e=>{S.dur=clampN(e.target.value,3,120,10);e.target.value=S.dur;save();});
 $('#sampleBtn').addEventListener('click',()=>{
   if(S.roster.trim()&&!confirmInline())return;
