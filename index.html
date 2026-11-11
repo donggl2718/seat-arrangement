@@ -82,6 +82,10 @@ input[type=number]{width:64px;padding:0 var(--s2)}
 [data-tip]::before{content:"";bottom:calc(100% + var(--s3) - 5px);transform:translate(-50%,var(--s1)) rotate(45deg);width:10px;height:10px;background:var(--ink)}
 [data-tip]:hover::after,[data-tip]:hover::before{opacity:1;transform:translate(-50%,0)}
 [data-tip]:hover::before{transform:translate(-50%,0) rotate(45deg)}
+[data-tip].tip-start::after{left:0;transform:translate(0,var(--s1));white-space:pre-line;text-align:left;max-width:280px}
+[data-tip].tip-start::before{left:var(--s6);transform:translate(0,var(--s1)) rotate(45deg)}
+[data-tip].tip-start:hover::after{transform:none}
+[data-tip].tip-start:hover::before{transform:rotate(45deg)}
 [data-tip].tip-below::after{bottom:auto;top:calc(100% + var(--s3));left:auto;right:0;transform:translate(0,calc(var(--s1) * -1))}
 [data-tip].tip-below::before{bottom:auto;top:calc(100% + var(--s3) - 5px);left:auto;right:var(--s5)}
 [data-tip].tip-below:hover::after{transform:none}
@@ -227,7 +231,7 @@ body.present aside,body.nopanel aside{display:none}
     <div class="body">
       <textarea id="roster" placeholder="한 줄에 한 명씩 입력해요.&#10;&#10;1 김민준 의사&#10;2 이서연 웹툰 작가&#10;3 박도윤 교사&#10;…&#10;&#10;번호 / 이름 / 진로희망 순서로 넣어요.&#10;진로희망은 비워 둬도 되고, 번호 없이 이름만 넣으면 순서대로 번호가 붙어요.&#10;엑셀에서 세 칸을 복사해 붙여넣어도 돼요."></textarea>
       <div class="warn" id="rosterWarn"></div>
-      <div class="row"><button class="btn w" id="fileBtn">엑셀·CSV 파일 불러오기</button><button class="btn" id="sampleBtn">예시 명단</button></div>
+      <div class="row"><button class="btn w tip-start" id="fileBtn" data-tip="첫 번째 시트를 한 줄에 한 명씩 읽어요.&#10;A열 번호, B열 이름, C열 진로희망&#10;&#10;· 맨 위 제목 줄(번호·이름 등)은 건너뛰어요.&#10;· 진로희망 칸은 비워 둬도 돼요.&#10;· 번호 없이 이름만 있으면 번호가 차례로 붙어요.&#10;· .xlsx, .csv 파일을 불러올 수 있어요.">엑셀·CSV 파일 불러오기</button><button class="btn" id="sampleBtn">예시 명단</button></div>
       <input type="file" id="fileIn" accept=".xlsx,.csv,.txt" hidden>
       <div class="row roles">
         <label><span>학급회장</span><select id="rolePres"></select></label>
