@@ -115,6 +115,7 @@ body.present #panelBtn{display:none}
 .grid{flex:1;display:grid;gap:var(--s3);min-height:0;--fs:18px}
 .grid.pair{column-gap:var(--s1)}
 .desk{background:var(--desk);border:2px solid var(--deskb);border-radius:var(--r);display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;min-height:0;position:relative;overflow:hidden;user-select:none;transition:transform .15s}
+.desk>*{flex-shrink:0}
 .desk .no{font-weight:500;font-size:calc(var(--fs)*.62);color:var(--muted);line-height:1.2;min-height:1.2em}
 .desk .job{font-size:calc(var(--fs)*.55);color:#b0673a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:94%;line-height:1.3;min-height:1.3em}
 .grid:not(.hasjob) .desk .job{display:none}
@@ -152,7 +153,7 @@ body.present aside,body.nopanel aside{display:none}
 .modal.open{display:flex}
 .mbox{background:var(--panel);border-radius:var(--r-lg);width:min(980px,100%);max-height:94vh;overflow:auto;padding:var(--s5)}
 .mbox h3{font-family:var(--serif);margin:0 0 var(--s2);font-size:18px}
-.mroom{height:336px;display:flex;margin:var(--s3) 0}
+.mroom{height:336px;flex:none;display:flex;margin:var(--s3) 0}
 .mroom .board{padding:var(--s1);font-size:12px}
 .mroom .grid{gap:var(--s2)}
 .picker{display:flex;gap:var(--s2);align-items:center;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:var(--s3);margin-bottom:var(--s3)}
@@ -451,8 +452,8 @@ function renderRoom(container,o){
 }
 function fitFont(grid,L,W,H){
   if(!W){const r=grid.getBoundingClientRect();W=r.width;H=r.height;}
-  if(!W||!H)return;
-  const fs=Math.max(9,Math.min(H/L.rows*0.27,W/L.cols*0.17,34));
+  if(!W||!H){if(!grid._fitRetry){grid._fitRetry=1;requestAnimationFrame(()=>fitFont(grid,L));}return;}
+  const fs=Math.max(9,Math.min(H/L.rows*0.27,(H/L.rows-16)/2.9,W/L.cols*0.17,34));
   grid.style.setProperty('--fs',fs.toFixed(1)+'px');
 }
 
@@ -463,6 +464,12 @@ function arrValid(){return S.arr&&S.arr.sig===curLayout().sig;}
 function validSecrets(L,smap){
   const ids=new Set(L.open.map(s=>s.id));const out={};
   Object.entries(S.secrets[L.mode]||{}).forEach(([id,k])=>{if(ids.has(id)&&smap[k])out[id]=k;});
+  return out;
+}
+// 한 학생을 여러 자리에 지정했으면 그중 한 자리를 무작위로 골라 앉힘
+function pickSecrets(L,smap){
+  const by={};Object.entries(validSecrets(L,smap)).forEach(([id,k])=>{(by[k]=by[k]||[]).push(id);});
+  const out={};Object.entries(by).forEach(([k,ids])=>{out[ids[Math.floor(Math.random()*ids.length)]]=k;});
   return out;
 }
 function setSeg(id,val){
@@ -668,7 +675,7 @@ function apartGroups(smap){return (S.apart||[]).map(g=>({type:g.type,n:g.n,keys:
 function computeArrangement(){
   const L=curLayout();const smap=studentMap(students);
   // 지정석은 랜덤 배치에서만 적용 (번호순은 순서 그대로)
-  const map=S.order==='random'?validSecrets(L,smap):{};const used=new Set(Object.values(map));
+  const map=S.order==='random'?pickSecrets(L,smap):{};const used=new Set(Object.values(map));
   let rest=students.filter(s=>!used.has(s.key));
   let free=(S.order==='random'?orderSeats(L,'row'):orderSeats(L,S.dir)).filter(s=>!s.blocked&&map[s.id]==null);
   if(S.order!=='random'){const m=Object.assign({},map);rest.forEach((st,i)=>{m[free[i].id]=st.key;});return {L,map:m,conf:0};}
@@ -865,7 +872,7 @@ function drawSecret(){
 
   if(mTab==='seat'){
     const sh=el('div','hint');
-    sh.append(document.createTextNode('책상을 클릭하고 앉힐 학생을 고르세요. '),el('strong','em','랜덤 배치에서만 지정한 자리에 앉아요.'),document.createTextNode(' 번호순으로 배치하면 지정석은 무시돼요. (시험 대형과 짝꿍 분단은 따로 저장돼요)'));
+    sh.append(document.createTextNode('책상을 클릭하고 앉힐 학생을 고르세요. 한 학생을 여러 자리에 지정하면 배치할 때마다 그중 한 자리에 앉아요. '),el('strong','em','랜덤 배치에서만 지정한 자리에 앉아요.'),document.createTextNode(' 번호순으로 배치하면 지정석은 무시돼요. (시험 대형과 짝꿍 분단은 따로 저장돼요)'));
     panel.append(sh);
     const mroom=el('div','room mroom');panel.append(mroom);
     const vm={};Object.entries(sec).forEach(([id,k])=>{if(smap[k])vm[id]=k;});
@@ -876,15 +883,16 @@ function drawSecret(){
       const s=L.seats.find(x=>x.id===mSel);
       pk.append(el('b',null,`${L.mode==='pair'?(s.group+1)+'분단 '+(s.row+1)+'번째 줄 '+(s.side?'오른쪽':'왼쪽'):(s.col+1)+'열 '+(s.row+1)+'번째 줄'} 자리:`));
       const selEl=el('select');selEl.append(new Option('— 지정 안 함 —',''));
-      students.forEach(st=>{const where=Object.keys(sec).find(id=>sec[id]===st.key&&id!==mSel);selEl.append(new Option(`${st.no}번 ${st.name}${where?' (다른 자리에 지정됨)':''}`,st.key));});
+      students.forEach(st=>{const n=Object.keys(vm).filter(id=>vm[id]===st.key&&id!==mSel).length;selEl.append(new Option(`${st.no}번 ${st.name}${n?` (다른 자리 ${n}곳에도 지정됨)`:''}`,st.key));});
       selEl.value=sec[mSel]&&smap[sec[mSel]]?sec[mSel]:'';
-      selEl.onchange=()=>{const k=selEl.value;Object.keys(sec).forEach(id=>{if(sec[id]===k)delete sec[id];});if(k)sec[mSel]=k;else delete sec[mSel];save();drawSecret();};
+      selEl.onchange=()=>{const k=selEl.value;if(k)sec[mSel]=k;else delete sec[mSel];save();drawSecret();};
       pk.append(selEl);
     }else pk.append(el('span','hint','위 배치도에서 책상을 먼저 클릭하세요.'));
     panel.append(pk);
-    const list=el('div','slist');const ents=Object.entries(vm);
-    if(!ents.length)list.append(el('span','hint','아직 지정한 자리가 없어요.'));
-    ents.forEach(([id,k])=>{const c=el('span','chip');c.append(document.createTextNode(`${smap[k].no}번 ${smap[k].name}`));const x=el('button',null,'✕');x.title='해제';x.onclick=()=>{delete sec[id];save();drawSecret();};c.append(x);list.append(c);});
+    const list=el('div','slist');const by={};Object.entries(vm).forEach(([id,k])=>{(by[k]=by[k]||[]).push(id);});
+    const ks=Object.keys(by).sort((a,b)=>smap[a].no-smap[b].no);
+    if(!ks.length)list.append(el('span','hint','아직 지정한 자리가 없어요.'));
+    ks.forEach(k=>{const c=el('span','chip');c.append(document.createTextNode(`${smap[k].no}번 ${smap[k].name}${by[k].length>1?` · ${by[k].length}곳 중 한 자리`:''}`));const x=el('button',null,'✕');x.title='이 학생의 지정석 모두 해제';x.onclick=()=>{by[k].forEach(id=>delete sec[id]);save();drawSecret();};c.append(x);list.append(c);});
     const row=el('div','row');row.style.alignItems='flex-start';list.style.flex='1';list.style.margin='0';
     const clr=el('button','btn','모두 해제');clr.onclick=()=>{if(!confirmInline('secrets','지정석을 모두 해제해요. 한 번 더 누르면 해제해요.'))return;S.secrets[L.mode]={};save();drawSecret();toast('지정석을 모두 해제했어요');};
     row.append(list,clr);panel.append(row);
